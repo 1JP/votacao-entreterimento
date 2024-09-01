@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('category_types', function (Blueprint $table) {
+        Schema::create('indicative_ratings', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 45);
+            $table->string('indicative', 45);
             $table->longText('description');
             $table->timestamps();
         });
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('category_types');
+        Schema::dropIfExists('indicative_ratings');
     }
 };
