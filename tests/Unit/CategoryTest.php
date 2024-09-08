@@ -12,6 +12,9 @@ class CategoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * test create category
+     */
     public function test_create_category(): void
     {
         $category_type = CategoryType::factory()->create();
@@ -26,6 +29,9 @@ class CategoryTest extends TestCase
         $this->assertTrue($category->active);
     }
 
+    /** 
+     * test update category 
+     */
     public function test_update_category(): void
     {
         $category_type_old = CategoryType::factory()->create();
@@ -56,6 +62,9 @@ class CategoryTest extends TestCase
         $this->assertFalse($category->active);
     }
 
+    /** 
+     * test delete category 
+     */
     public function test_delete_category():void
     {
         $category_type = CategoryType::factory()->create();
@@ -78,7 +87,10 @@ class CategoryTest extends TestCase
         ]);
     }
 
-    public function test_not_create_category()
+    /** 
+     * test not create category name integer
+     */
+    public function test_not_create_name_integer_category()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -91,6 +103,9 @@ class CategoryTest extends TestCase
         ]);
     }
 
+    /**
+     * test not create category with max 45 
+     */
     public function test_not_create_name_with_max_45_characters_category()
     {
         $this->expectException(InvalidArgumentException::class);
