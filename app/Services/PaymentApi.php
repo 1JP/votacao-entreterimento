@@ -106,7 +106,77 @@ class PaymentApi
         $endpoint = "customers/".$customer_id."/billing_info";
         $headers = [];
         $body = json_encode($data);
-        
+
+        $response = PaymentApi::exec('PUT', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function createSubscription(array $data)
+    {
+        $endpoint = "subscriptions";
+        $headers = [];
+        $body = json_encode($data);
+
+        $response = PaymentApi::exec('POST', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function getSubscription(string $subscription_id)
+    {
+        $endpoint = "subscriptions/".$subscription_id;
+        $headers = [];
+        $body = null;
+
+        $response = PaymentApi::exec('GET', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function getSubscriptionInvoice(string $subscription_id)
+    {
+        $endpoint = "subscriptions/".$subscription_id."/invoices";
+        $headers = [];
+        $body = null;
+
+        $response = PaymentApi::exec('GET', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function updateSubscription(array $data, string $subscription_id)
+    {
+        $endpoint = "subscriptions/".$subscription_id;
+        $headers = [];
+        $body = json_encode($data);
+
+        $response = PaymentApi::exec('PUT', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function cancelSubscription(string $subscription_id)
+    {
+        $endpoint = "subscriptions/".$subscription_id."/cancel";
+        $headers = [];
+        $body = null;
+
+        $response = PaymentApi::exec('PUT', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function suspendSubscription(string $subscription_id)
+    {
+        $endpoint = "subscriptions/".$subscription_id."/suspend";
+        $headers = [];
+        $body = null;
+
+        $response = PaymentApi::exec('PUT', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function activeSubscription(string $subscription_id)
+    {
+        $endpoint = "subscriptions/".$subscription_id."/activate";
+        $headers = [];
+        $body = null;
+
         $response = PaymentApi::exec('PUT', $endpoint, $body, $headers);
         return json_decode($response);
     }
