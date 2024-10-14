@@ -181,6 +181,16 @@ class PaymentApi
         return json_decode($response);
     }
 
+    public function notifications()
+    {
+        $endpoint = "preferences/notifications";
+        $headers = [];
+        $body = null;
+
+        $response = PaymentApi::exec('GET', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
     public function exec($method, $endpoint, $body = null, $headers = [])
     {
         $headers[] = 'Content-Type: application/json';
