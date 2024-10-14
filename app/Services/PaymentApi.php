@@ -71,6 +71,46 @@ class PaymentApi
         return json_decode($response);
     }
 
+    public function createCustomer(array $data)
+    {
+        $endpoint = "customers";
+        $headers = [];
+        $body = json_encode($data);
+
+        $response = PaymentApi::exec('POST', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function getCustomer(string $customer_id)
+    {
+        $endpoint = "customers/".$customer_id;
+        $headers = [];
+        $body = null;
+
+        $response = PaymentApi::exec('GET', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function updateDataCustomer(array $data, string $customer_id)
+    {
+        $endpoint = "customers/".$customer_id;
+        $headers = [];
+        $body = json_encode($data);
+
+        $response = PaymentApi::exec('PUT', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
+    public function updateDataBillingInfo(array $data, string $customer_id)
+    {
+        $endpoint = "customers/".$customer_id."/billing_info";
+        $headers = [];
+        $body = json_encode($data);
+        
+        $response = PaymentApi::exec('PUT', $endpoint, $body, $headers);
+        return json_decode($response);
+    }
+
     public function exec($method, $endpoint, $body = null, $headers = [])
     {
         $headers[] = 'Content-Type: application/json';
