@@ -14,27 +14,27 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         Setting::create([
-            'name' => 'sandbox-api-pagseguro',
+            'name' => 'sandbox-payment',
             'body' => 1,
-            'group' => 'api'
+            'group' => 'api-payment'
         ]);
 
         Setting::create([
-            'name' => 'url-sanbox-api-pagseguro',
+            'name' => 'url-sanbox-payment',
             'body' => 'https://sandbox.api.assinaturas.pagseguro.com/',
-            'group' => 'api'
+            'group' => 'api-payment'
         ]);
 
         Setting::create([
-            'name' => 'url-prod-api-pagseguro',
+            'name' => 'url-prod-payment',
             'body' => 'https://api.assinaturas.pagseguro.com/',
-            'group' => 'api'
+            'group' => 'api-payment'
         ]);
 
         Setting::create([
-            'name' => 'token-api-pagseguro',
+            'name' => 'token-payment',
             'body' => '2105e1f5-57f1-4f81-8724-37084b6a77448ceb8f6a4f048cce9fb9f9552374524ced7e-c40e-43c7-ae1f-5f02f26024a1',
-            'group' => 'api'
+            'group' => 'api-payment'
         ]);
     }
 }

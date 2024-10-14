@@ -11,9 +11,9 @@ class PagSeguroApi
     private String $token;
 
     public function __construct() {
-        $sandbox = Setting::where('name', 'sandbox-api-pagseguro')->first();
-        $urlSandbox = Setting::where('name', 'url-sanbox-api-pagseguro')->first();
-        $urlProd = Setting::where('name', 'url-prod-api-pagseguro')->first();
+        $sandbox = Setting::where('name', 'sandbox-api')->first();
+        $urlSandbox = Setting::where('name', 'url-sanbox-api')->first();
+        $urlProd = Setting::where('name', 'url-prod-api')->first();
 
         $this->url = $sandbox->body == "1" ? $urlSandbox->body : $urlProd->body;
     }
