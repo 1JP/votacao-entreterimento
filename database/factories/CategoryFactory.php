@@ -20,7 +20,7 @@ class CategoryFactory extends Factory
         return [
             'category_type_id' => CategoryType::factory(),
             'name' => fake()->name(),
-            'active' => true,
+            'active' => fake()->boolean(),
         ];
     }
 }
