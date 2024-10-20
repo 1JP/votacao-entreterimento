@@ -18,6 +18,7 @@ class PlanFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'description' => fake()->text(250),
             'number_film' => fake()->randomDigit(),
             'number_book' => fake()->randomDigit(),
             'number_serie' => fake()->randomDigit(),

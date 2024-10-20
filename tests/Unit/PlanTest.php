@@ -19,6 +19,7 @@ class PlanTest extends TestCase
     {
         $plan = Plan::factory()->create([
             'name' => 'Plano Teste',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -43,6 +44,7 @@ class PlanTest extends TestCase
     {
         $plan = Plan::factory()->create([
             'name' => 'Plano Teste',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -119,14 +121,15 @@ class PlanTest extends TestCase
     /**
      * test not create plan with max 45 
      */
-    public function test_not_create_name_with_max_45_characters_plan()
+    public function test_not_create_name_with_max_65_characters_plan()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $longString = "Esta é uma string que contém mais de 45 caracteres, para testar a validação e outras funções.";
+        $longString = "Esta é uma string que contém mais de 65 caracteres, para testar a validação e outras funções.";
 
         Plan::factory()->create([
             'name' => $longString,
+            'description' => fake()->text(250),
             'number_film' => fake()->randomDigit(),
             'number_book' => fake()->randomDigit(),
             'number_serie' => fake()->randomDigit(),
@@ -137,21 +140,43 @@ class PlanTest extends TestCase
     }
 
     /**
-     * test not create plan with max 100 
+     * test not create plan customer_id with max 100 
      */
-    public function test_not_create_name_with_max_100_characters_plan()
+    public function test_not_create_customer_id_with_max_100_characters_plan()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $longString = str_repeat('a', 101);
+        $longString = str_repeat('a', 100);
 
         Plan::factory()->create([
             'name' => fake()->name(),
+            'description' => fake()->text(250),
             'number_film' => fake()->randomDigit(),
             'number_book' => fake()->randomDigit(),
             'number_serie' => fake()->randomDigit(),
             'value' => fake()->randomFloat(),
             'customer_id' => $longString,
+            'active' => fake()->boolean(),
+        ]);
+    }
+
+    /**
+     * test not create plan description with max 250 
+     */
+    public function test_not_create_description_with_max_250_characters_plan()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $longString = str_repeat('a', 251);
+
+        Plan::factory()->create([
+            'name' => fake()->name(),
+            'description' => $longString,
+            'number_film' => fake()->randomDigit(),
+            'number_book' => fake()->randomDigit(),
+            'number_serie' => fake()->randomDigit(),
+            'value' => fake()->randomFloat(),
+            'customer_id' => fake()->text(100),
             'active' => fake()->boolean(),
         ]);
     }

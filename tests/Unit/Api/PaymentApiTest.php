@@ -62,6 +62,7 @@ class PaymentApiTest extends TestCase
 
         $plan = Plan::factory()->create([
             'name' => $name,
+            'description' => $newPlan->description,
             'number_film' => $number_film,
             'number_book' => $number_book,
             'number_serie' => $number_serie,
@@ -71,6 +72,7 @@ class PaymentApiTest extends TestCase
         ]);
 
         $this->assertEquals($plan->name, $name);
+        $this->assertEquals($plan->description, $newPlan->description);
         $this->assertEquals($plan->number_film, $number_film);
         $this->assertEquals($plan->number_book, $number_book);
         $this->assertEquals($plan->number_serie, $number_serie);
@@ -93,6 +95,7 @@ class PaymentApiTest extends TestCase
 
         $plan = Plan::factory()->create([
             'name' => 'Plano Teste',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -125,6 +128,7 @@ class PaymentApiTest extends TestCase
 
         $plan->update([
             'name' => $updatePlan->name,
+            'description' => $updatePlan->description,
             'number_film' => $number_film,
             'number_book' => $number_book,
             'number_serie' => $number_serie,
@@ -134,6 +138,7 @@ class PaymentApiTest extends TestCase
         ]);
 
         $this->assertEquals($plan->name, $name);
+        $this->assertEquals($plan->description, $updatePlan->description);
         $this->assertEquals($plan->number_film, $number_film);
         $this->assertEquals($plan->number_book, $number_book);
         $this->assertEquals($plan->number_serie, $number_serie);
@@ -149,6 +154,7 @@ class PaymentApiTest extends TestCase
     {
         $plan = Plan::factory()->create([
             'name' => 'Plano Teste',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -182,6 +188,7 @@ class PaymentApiTest extends TestCase
         
         $plan = Plan::factory()->create([
             'name' => 'Talon Hagenes',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -275,6 +282,7 @@ class PaymentApiTest extends TestCase
 
         $plan = Plan::factory()->create([
             'name' => 'Plano Teste',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -333,6 +341,7 @@ class PaymentApiTest extends TestCase
 
         $plan = Plan::factory()->create([
             'name' => 'Plano Teste',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -398,6 +407,7 @@ class PaymentApiTest extends TestCase
     {
         $plan = Plan::factory()->create([
             'name' => 'Plano Teste',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -434,6 +444,7 @@ class PaymentApiTest extends TestCase
 
         $plan = Plan::factory()->create([
             'name' => 'Plano Teste',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -477,6 +488,7 @@ class PaymentApiTest extends TestCase
         
         $plan = Plan::factory()->create([
             'name' => 'Talon Hagenes',
+            'description' => fake()->text(250),
             'number_film' => 1,
             'number_book' => 4,
             'number_serie' => 10,
@@ -512,5 +524,59 @@ class PaymentApiTest extends TestCase
             }
             $this->assertTrue($found, "Erro esperado não foi encontrado: " . json_encode($expectedError));
         }
+    }
+
+    /**
+     * teste create plan via payment api
+     */
+    public function test_create_customer_payment_api(): void
+    {
+        $name = fake()->name();
+        $name = substr($name, 0, 65);
+        $number_film = 1;
+        $number_book = 4;
+        $number_serie = 10;
+        $value = 45.00;
+
+        $body = [
+            "amount" => [
+                "currency" => "BRL",
+                "value" => 4500
+            ],
+            "interval" => [
+                "unit" => "MONTH",
+                "length" => 1
+            ],
+            "trial" => [
+                "enabled" => false,
+                "hold_setup_fee" => false
+            ],
+            "payment_method" => [
+                "CREDIT_CARD"
+            ],
+            "name" => $name,
+            "description" => "Teste de criação do plano"
+        ];
+
+        $newPlan = $this->paymentApi->createPlan($body);
+
+        $plan = Plan::factory()->create([
+            'name' => $name,
+            'description' => fake()->text(250),
+            'number_film' => $number_film,
+            'number_book' => $number_book,
+            'number_serie' => $number_serie,
+            'value' => $value,
+            'customer_id' => $newPlan->id,
+            'active' => true,
+        ]);
+
+        $this->assertEquals($plan->name, $name);
+        $this->assertEquals($plan->number_film, $number_film);
+        $this->assertEquals($plan->number_book, $number_book);
+        $this->assertEquals($plan->number_serie, $number_serie);
+        $this->assertEquals($plan->value, $value);
+        $this->assertEquals($plan->customer_id, $newPlan->id);
+        $this->assertTrue($plan->active);
     }
 }

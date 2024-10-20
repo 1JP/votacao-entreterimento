@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('plans', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 45);
+            $table->string('name', 65);
+            $table->text('description');
             $table->integer('number_film');
             $table->integer('number_book');
             $table->integer('number_serie');
