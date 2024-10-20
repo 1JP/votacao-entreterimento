@@ -21,7 +21,8 @@ class CategoryTest extends TestCase
 
         $category = Category::factory()->create([
             'category_type_id' => $category_type->id,
-            'name' => 'Batman Cavaleiro das trevas'
+            'name' => 'Batman Cavaleiro das trevas',
+            'active' => true,
         ]);
 
         $this->assertEquals($category->type->id, $category_type->id);
@@ -45,6 +46,7 @@ class CategoryTest extends TestCase
         $category->update([
             'category_type_id' => $category_type_new->id,
             'name' => 'Super-man o retorno',
+            'active' => true,
         ]);
 
         $this->assertEquals($category->type->id, $category_type_new->id);
