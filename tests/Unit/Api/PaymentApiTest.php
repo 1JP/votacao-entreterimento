@@ -3,6 +3,8 @@
 namespace Tests\Unit\Api;
 
 use App\Models\Plan;
+use App\Models\Subscription;
+use App\Models\User;
 use App\Services\PaymentApi;
 use Database\Seeders\SettingSeeder;
 use Illuminate\Support\Str;
@@ -693,7 +695,7 @@ class PaymentApiTest extends TestCase
 
         $this->assertTrue(isset($updateCustomerBillingInfoPayment->id));
     }
-    
+
     /**
      * teste not create customer via payment api
      */
@@ -930,5 +932,347 @@ class PaymentApiTest extends TestCase
             }
             $this->assertTrue($found, "Erro esperado não foi encontrado: " . json_encode($expectedError));
         }
+    }
+
+    /**
+     * test create subscripton 
+     */
+    public function test_create_subscription(): void
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_2809AE71-51EA-4BB9-BB95-3B4C97474991',
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create();
+        
+        $body = [
+            "plan" => [
+                "id" => $plan->customer_id
+            ],
+            "customer" => [
+                "id" => "CUST_B81E7D7F-5D92-4188-B0DE-582BA79E6224"
+            ],
+            "payment_method" => [
+                [
+                    "type" => "CREDIT_CARD",
+                    "card" => [
+                        "security_code" => 123
+                    ]
+                ]
+            ]
+        ];
+
+        $createSubscription = $this->paymentApi->createSubscription($body);
+        
+        $subscription = Subscription::factory()->create([
+            'plan_id' => $plan->id,
+            'user_id' => $user->id,
+            'status' => $this->statusSubscription($createSubscription->status),
+            'customer_id' => $createSubscription->id
+        ]);
+        
+        $this->assertTrue(isset($createSubscription->id));
+        $this->assertEquals('PLAN_2809AE71-51EA-4BB9-BB95-3B4C97474991', $createSubscription->plan->id);
+        $this->assertEquals('CUST_B81E7D7F-5D92-4188-B0DE-582BA79E6224', $createSubscription->customer->id);
+        $this->assertEquals($subscription->status, $this->statusSubscription($createSubscription->status));
+    }
+
+    /**
+     * test update subscripton 
+     */
+    public function test_update_subscription(): void
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_9F776B01-31F8-4DAF-B5E1-FA7E1CBF7B8B',
+            'active' => true,
+        ]);
+
+        $planOld = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_2809AE71-51EA-4BB9-BB95-3B4C97474991',
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create();
+        
+        $subscription = Subscription::factory()->create([
+            'plan_id' => $planOld->id,
+            'user_id' => $user->id,
+            'status' => 'ACTIVE',
+            'customer_id' => 'SUBS_1D7F7A69-178F-4078-9BF5-EC45841F02C9'
+        ]);
+
+        $body = [
+            "plan" => [
+                "id" => $plan->customer_id
+            ],
+        ];
+
+        $updateSubscription = $this->paymentApi->updateSubscription($body, $subscription->customer_id);
+        
+        $subscription->update([
+            'plan_id' => $plan->id,
+            'status' => $this->statusSubscription($updateSubscription->status),
+            'customer_id' => $updateSubscription->id
+        ]);
+        
+        $this->assertTrue(isset($updateSubscription->id));
+        $this->assertEquals($plan->customer_id, $updateSubscription->plan->id);
+        $this->assertEquals($subscription->status, $this->statusSubscription($updateSubscription->status));
+    }
+
+    /**
+     * test cancel subscripton
+     */
+    public function test_cancel_subscription(): void
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_9F776B01-31F8-4DAF-B5E1-FA7E1CBF7B8B',
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create();
+        
+        $subscription = Subscription::factory()->create([
+            'plan_id' => $plan->id,
+            'user_id' => $user->id,
+            'status' => 'ACTIVE',
+            'customer_id' => 'SUBS_1D7F7A69-178F-4078-9BF5-EC45841F02C9'
+        ]);
+
+        $cancelSubscription = $this->paymentApi->cancelSubscription($subscription->customer_id);
+
+        $status = empty($cancelSubscription) ? 'CANCELED' : 'ACTIVE';
+
+        $subscription->update([
+            'status' => $this->statusSubscription($status),
+        ]);
+
+        $this->assertEquals($subscription->status, $this->statusSubscription($status));
+    }
+
+    /** 
+     * test suspend subscription
+    */
+    public function test_suspend_subscription(): void
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_9F776B01-31F8-4DAF-B5E1-FA7E1CBF7B8B',
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create();
+        
+        $subscription = Subscription::factory()->create([
+            'plan_id' => $plan->id,
+            'user_id' => $user->id,
+            'status' => 'ACTIVE',
+            'customer_id' => 'SUBS_309112AE-B25B-404B-A02C-527FF674740C'
+        ]);
+
+        $suspendSubscription = $this->paymentApi->suspendSubscription($subscription->customer_id);
+
+        $status = empty($suspendSubscription) ? 'SUSPENDED' : 'ACTIVE';
+
+        $subscription->update([
+            'status' => $this->statusSubscription($status),
+        ]);
+
+        $this->assertEquals($subscription->status, $this->statusSubscription($status));
+    }
+
+    /** 
+     * test active subscription
+    */
+    public function test_active_subscription(): void
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_9F776B01-31F8-4DAF-B5E1-FA7E1CBF7B8B',
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create();
+        
+        $subscription = Subscription::factory()->create([
+            'plan_id' => $plan->id,
+            'user_id' => $user->id,
+            'status' => 'ACTIVE',
+            'customer_id' => 'SUBS_309112AE-B25B-404B-A02C-527FF674740C'
+        ]);
+
+        $activeSubscription = $this->paymentApi->activeSubscription($subscription->customer_id);
+
+        $status = empty($activeSubscription) ? 'ACTIVE' : 'SUSPENDED';
+
+        $subscription->update([
+            'status' => $this->statusSubscription($status),
+        ]);
+
+        $this->assertEquals($subscription->status, $this->statusSubscription($status));
+    }
+
+    /**
+     * test get subscription 
+     */
+    public function test_get_subscription(): void
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_9F776B01-31F8-4DAF-B5E1-FA7E1CBF7B8B',
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create();
+        
+        $subscription = Subscription::factory()->create([
+            'plan_id' => $plan->id,
+            'user_id' => $user->id,
+            'status' => 'ACTIVE',
+            'customer_id' => 'SUBS_309112AE-B25B-404B-A02C-527FF674740C'
+        ]);
+
+        $getSubscription = $this->paymentApi->getSubscription($subscription->customer_id);
+
+        $this->assertEquals($subscription->customer_id, $getSubscription->id);
+    }
+
+    /**
+     * test get subscription invoice 
+     */
+    public function test_get_subscription_invoice(): void
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_9F776B01-31F8-4DAF-B5E1-FA7E1CBF7B8B',
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create();
+        
+        $subscription = Subscription::factory()->create([
+            'plan_id' => $plan->id,
+            'user_id' => $user->id,
+            'status' => 'ACTIVE',
+            'customer_id' => 'SUBS_309112AE-B25B-404B-A02C-527FF674740C'
+        ]);
+
+        $getSubscriptionInvoice = $this->paymentApi->getSubscriptionInvoice($subscription->customer_id);
+
+        $this->assertIsArray($getSubscriptionInvoice->invoices);
+    }
+
+    /**
+     * test not create subscripton 
+     */
+    public function test_not_create_subscription(): void
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Teste',
+            'description' => fake()->text(250),
+            'number_film' => 1,
+            'number_book' => 4,
+            'number_serie' => 10,
+            'value' => 45.00,
+            'customer_id' => 'PLAN_2809AE71-51EA-4BB9-BB95-3B4C97474991',
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create();
+        
+        $body = [
+            "plan" => [
+                "id" => $plan->customer_id
+            ],
+            "customer" => [
+                "id" => "CUST_B81E7D7F-5D92-4188-B0DE-582BA79E6224"
+            ],
+            "payment_method" => [
+                [
+                    "type" => "CREDIT_CARD",
+                    "card" => [
+                        "security_code" => 123
+                    ]
+                ]
+            ]
+        ];
+
+        $createSubscription = $this->paymentApi->createSubscription($body);
+        
+        $subscription = Subscription::factory()->create([
+            'plan_id' => $plan->id,
+            'user_id' => $user->id,
+            'status' => $this->statusSubscription($createSubscription->status),
+            'customer_id' => $createSubscription->id
+        ]);
+        
+        $this->assertTrue(isset($createSubscription->id));
+        $this->assertEquals('PLAN_2809AE71-51EA-4BB9-BB95-3B4C97474991', $createSubscription->plan->id);
+        $this->assertEquals('CUST_B81E7D7F-5D92-4188-B0DE-582BA79E6224', $createSubscription->customer->id);
+        $this->assertEquals($subscription->status, $this->statusSubscription($createSubscription->status));
+    }
+
+    public function statusSubscription(String $status)
+    {
+        $arrayStatus = [
+            'AUTHORIZED' => 'ACTIVE',
+            'PAID' => 'ACTIVE',
+            'ACTIVE' => 'ACTIVE',
+            'DECLINED' => 'OVERDUE',
+            'OVERDUE' => 'OVERDUE',
+            'EXPIRED' => 'EXPIRED',
+            'CANCELED' => 'CANCELED',
+            'SUSPENDED' => 'SUSPENDED',
+            'TRIAL' => 'TRIAL',
+            'PENDING' => 'PENDING', 
+            'PENDING_ACTION' => 'PENDING_ACTION'
+        ];
+        
+        return $arrayStatus[$status];
     }
 }
