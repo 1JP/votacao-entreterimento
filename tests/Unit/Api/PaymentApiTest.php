@@ -544,9 +544,31 @@ class PaymentApiTest extends TestCase
                 "postal_code" => "35730000",
                 "country" => "BRA"
             ],
+            "billing_info" => [
+                [
+                    "card" => [
+                        "holder" => [
+                            "phone" => [
+                                "country" => "55",
+                                "area" => "31",
+                                "number" => "999999999"
+                            ],
+                            "name" => $name,
+                            "birth_date" => "1995-10-10",
+                            "tax_id" => "65531253095"
+                        ],
+                        "number" =>"4539620659922097",
+                        "security_code" => 123,
+                        "exp_year" =>"2026",
+                        "exp_month" =>"12"
+                    ],
+                    "type" =>"CREDIT_CARD"
+                ]
+            ],
             "name" => $name,
             "email" => $email,
-            "tax_id" => '20162199040',
+            "birth_date" => "1995-10-10",
+            "tax_id" => '65531253095',
             "phones" => [
                 [
                     "country" => "55",
@@ -638,6 +660,40 @@ class PaymentApiTest extends TestCase
 
     }
 
+    /**
+     * teste update customer billing info
+     */
+    public function test_update_customer_billing_info_payment_api(): void
+    {
+        $customerId = 'CUST_F25B4BD7-5471-469E-9CB0-D21C904D0EFA';
+
+        $body = [
+            [
+                "card" => [
+                    "holder" => [
+                        "phone" => [
+                            "country" => "55",
+                            "area" => "31",
+                            "number" => "999999999"
+                        ],
+                        "name" => "Brennon Hill",
+                        "birth_date" => "1995-10-10",
+                        "tax_id" => "65531253095"
+                    ],
+                    "number" => "4539620659922097",
+                    "security_code" => 123,
+                    "exp_year" => "2026",
+                    "exp_month" => "12"
+                ],
+                "type" => "CREDIT_CARD"
+            ]
+        ];
+        
+        $updateCustomerBillingInfoPayment = $this->paymentApi->updateDataBillingInfo($body, $customerId);
+
+        $this->assertTrue(isset($updateCustomerBillingInfoPayment->id));
+    }
+    
     /**
      * teste not create customer via payment api
      */
@@ -849,7 +905,7 @@ class PaymentApiTest extends TestCase
         $errorMessages = $customer->error_messages;
 
         $this->assertIsArray($errorMessages);
-        
+
         $expectedErrors = [
             [
                 "error" =>"invalid_parameter",
