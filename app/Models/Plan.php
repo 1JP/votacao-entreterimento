@@ -17,11 +17,24 @@ class Plan extends Model
             throw new \InvalidArgumentException('O nome não pode ser um número inteiro.');
         }
 
-        if (strlen($value) > 45) {
-            throw new \InvalidArgumentException('O nome não pode ter mais que 45 caracteres.');
+        if (strlen($value) > 65) {
+            throw new \InvalidArgumentException('O nome não pode ter mais que 65 caracteres.');
         }
 
         $this->attributes['name'] = $value;
+    }
+
+    public function setDescriptionAttribute($value)
+    {
+        if (is_int($value)) {
+            throw new \InvalidArgumentException('A descrição não pode ser um número inteiro.');
+        }
+
+        if (strlen($value) > 250) {
+            throw new \InvalidArgumentException('A descrição não pode ter mais que 250 caracteres.');
+        }
+
+        $this->attributes['description'] = $value;
     }
 
     public function setNumberFilmAttribute($value)
